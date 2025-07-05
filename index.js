@@ -95,7 +95,7 @@ async function updateProducts() {
     for (const product of response.productos) {
         try {
             // if (product.Codigo !== 'PET 008') continue; // If para pruebas con un producto específico
-            const handle = `${product.Nombre.replace(/\.\s*$/, '')} ${product.Codigo}`.trim().toLowerCase().replace(/[\s/]+/g, '-'); // Reemplaza espacios y diagonales
+            const handle = `${product.Nombre.replace(/\.\s*$/, '')} ${product.Codigo}`.trim().toLowerCase().replace(/[\s\/,]+/g, '-'); // Reemplaza espacios, comas y diagonales
             let shopifyProduct = await getProductByHandle(handle);
             if (!shopifyProduct) {
                 await uploadProduct(product); // Intenta subir producto
