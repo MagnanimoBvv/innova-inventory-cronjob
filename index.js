@@ -98,7 +98,7 @@ async function updateProducts() {
             const handle = `${product.Nombre.replace(/\.\s*$/, '')} ${product.Codigo}`.trim().toLowerCase().replace(/[\s\/,]+/g, '-'); // Reemplaza espacios, comas y diagonales
             let shopifyProduct = await getProductByHandle(handle);
             if (!shopifyProduct) {
-                await uploadProduct(product); // Intenta subir producto
+                // await uploadProduct(product); // Intenta subir producto
                 continue;
             }
             
