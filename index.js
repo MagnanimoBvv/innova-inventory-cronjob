@@ -23,7 +23,7 @@ async function getInnovaProducts() {
 
 async function getProductByHandle(handle) {
     const response = await axios.post(
-        'https://gi-hh-global.myshopify.com/admin/api/2024-07/graphql.json',
+        process.env.GRAPHQL_URL,
         JSON.stringify({
             query: `
                 query {
@@ -55,7 +55,7 @@ async function getProductByHandle(handle) {
 async function updateInventory(input) {
     //Usa esta mutation porque Shopify no permite actualizar inventario por productVariantsBulkUpdate
     const response = await axios.post(
-        'https://gi-hh-global.myshopify.com/admin/api/2024-07/graphql.json',
+        process.env.GRAPHQL_URL,
         JSON.stringify({
             query: `
                 mutation InventorySet($input: InventorySetQuantitiesInput!) {

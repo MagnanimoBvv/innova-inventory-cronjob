@@ -491,7 +491,7 @@ function getWeight(weight) {
 
 async function uploadShopifyProduct(input, media) {
     const response = await axios.post(
-        'https://gi-hh-global.myshopify.com/admin/api/2024-07/graphql.json',
+        process.env.GRAPHQL_URL,
         JSON.stringify({
             query: `
                 mutation productCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
@@ -530,7 +530,7 @@ async function uploadShopifyProduct(input, media) {
 
 async function uploadVariants(productId, variants) {
     const response = await axios.post(
-        'https://gi-hh-global.myshopify.com/admin/api/2024-07/graphql.json',
+        process.env.GRAPHQL_URL,
         JSON.stringify({
             query: `
                 mutation ProductVariantsCreate($productId: ID!, $strategy: ProductVariantsBulkCreateStrategy, $variants: [ProductVariantsBulkInput!]!) {
@@ -565,7 +565,7 @@ async function uploadVariants(productId, variants) {
 
 async function publishProduct(id, input) {
     const response = await axios.post(
-        'https://gi-hh-global.myshopify.com/admin/api/2024-07/graphql.json',
+        process.env.GRAPHQL_URL,
         JSON.stringify({
             query: `
                 mutation publishablePublish($id: ID!, $input: [PublicationInput!]!) {
