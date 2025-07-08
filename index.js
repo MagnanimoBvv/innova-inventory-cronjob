@@ -2,6 +2,7 @@ const axios = require('axios');
 require('dotenv').config();
 const { uploadProduct } = require('./uploadProduct');
 const { getLocationId } = require('./getLocations');
+const { getPublications } = require('./getPublications');
 
 async function getInnovaProducts() {
     const response = await axios.get(
@@ -93,17 +94,18 @@ async function updateProducts() {
 
     if (response.respuesta_llave.status !== 'success') return;
 
+    const locationId = await getLocationId();
+    const productPublications = await getPublications();
     for (const product of response.productos) {
         try {
             // if (product.Codigo !== 'PET 008') continue; // If para pruebas con un producto específico
             const handle = `${product.Nombre.replace(/\.\s*$/, '')} ${product.Codigo}`.trim().toLowerCase().replace(/[\s\/,]+/g, '-'); // Reemplaza espacios, comas y diagonales
             let shopifyProduct = await getProductByHandle(handle);
             if (!shopifyProduct) {
-                // await uploadProduct(product); // Intenta subir producto
+                // await uploadProduct(product, locationId, productPublications); // Intenta subir producto
                 continue;
             }
 
-            const locationId = await getLocationId();
             const activeVariants = product.Variantes.filter(variant => variant.Tono !== '');
             const shopifyVariants = shopifyProduct.variants.nodes;
             for (const activeVariant of activeVariants) {

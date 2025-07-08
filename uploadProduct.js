@@ -1,7 +1,5 @@
 const axios = require('axios');
 require('dotenv').config();
-const { getLocationId } = require('./getLocations');
-const { getPublications } = require('./getPublications');
 
 async function getInnovaProductByCode(code) {
     const response = await axios.get(
@@ -599,7 +597,7 @@ async function publishProduct(id, input) {
     return response.data.data.publishablePublish.publishable;
 }
 
-async function uploadProduct(product) {
+async function uploadProduct(product, locationId, productPublications) {
     try {
         const productTitle = `${product.Nombre.replace(/\.\s*$/, '')} ${product.Codigo}`;
         const productTags = categories[`${product.Categoria.join(', ')} - ${product.SubCategorias.join(', ')}`];
@@ -655,7 +653,6 @@ async function uploadProduct(product) {
 
         const productId = productResponse.id;
         const productWeight = getWeight(productDetails.Peso_prod);
-        const locationId = await getLocationId();
         const productPrice = parseFloat(product.Precio) / 0.67;
 
         const productMediaNodes = productResponse.media.nodes;
@@ -693,8 +690,7 @@ async function uploadProduct(product) {
             };
         });
         const variantResponse = await uploadVariants(productId, productVariants);
-        
-        const productPublications = await getPublications();
+
         const publishResponse = await publishProduct(productId, productPublications);
 
         console.log(`Variantes de ${product.Codigo} subidas y publicadas en ${publishResponse.availablePublicationsCount.count} canales: ${variantResponse.map(v => v.title).join(', ')}`);
