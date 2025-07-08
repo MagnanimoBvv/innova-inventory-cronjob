@@ -1,6 +1,7 @@
 const axios = require('axios');
 require('dotenv').config();
 const { uploadProduct } = require('./uploadProduct');
+const { getLocationId } = require('./getLocations');
 
 async function getInnovaProducts() {
     const response = await axios.get(
@@ -101,7 +102,8 @@ async function updateProducts() {
                 // await uploadProduct(product); // Intenta subir producto
                 continue;
             }
-            
+
+            const locationId = await getLocationId();
             const activeVariants = product.Variantes.filter(variant => variant.Tono !== '');
             const shopifyVariants = shopifyProduct.variants.nodes;
             for (const activeVariant of activeVariants) {
@@ -113,7 +115,7 @@ async function updateProducts() {
                     const variantToUpdate = {
                         quantities: {
                             inventoryItemId: variant.inventoryItem.id, //Usa id de inventario porque usar id de variante o producto no funciona
-                            locationId: 'gid://shopify/Location/69743050958',
+                            locationId,
                             quantity: variantInventory,
                         },
                         name: "available",
