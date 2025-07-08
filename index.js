@@ -91,7 +91,6 @@ async function updateInventory(input) {
 async function updateProducts() {
     const response = await getInnovaProducts();
 
-    console.log(`Productos obtenidos: ${response.productos.length} ${response.respuesta_llave.status}`);
     if (response.respuesta_llave.status !== 'success') return;
 
     for (const product of response.productos) {
@@ -101,7 +100,6 @@ async function updateProducts() {
             let shopifyProduct = await getProductByHandle(handle);
             if (!shopifyProduct) {
                 // await uploadProduct(product); // Intenta subir producto
-                console.log(`Producto no encontrado en Shopify: ${product.Nombre} ${product.Codigo}`);
                 continue;
             }
 
