@@ -599,12 +599,12 @@ async function publishProduct(id, input) {
 
 async function uploadProduct(product, locationId, productPublications) {
     try {
-        const productTitle = `${product.Nombre.replace(/\.\s*$/, '')} ${product.Codigo}`;
+        const productTitle = `${product.Nombre.replace(/\.*$/, '')} ${product.Codigo}`;
         const productTags = categories[`${product.Categoria.join(', ')} - ${product.SubCategorias.join(', ')}`];
         const productDetails = await getInnovaProductByCode(product.Codigo);
         const productPrintingTechniques = getPrintingTechniques(productDetails.Tec_Impresion);
         const productInput = {
-            handle: productTitle,
+            handle: productTitle.replace(/[.,]/g, ''),
             title: productTitle.toUpperCase(),
             descriptionHtml: product.Descripcion,
             vendor: 'Innova',
