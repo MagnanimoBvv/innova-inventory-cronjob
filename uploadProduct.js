@@ -458,7 +458,7 @@ function getPrintingTechniques(techniques) {
     const techniquesArray = techniques
         .split(', ')
         .map(tech => printingTechniques[tech]);
-    
+
     return [...new Set(techniquesArray)].join('-');
 }
 

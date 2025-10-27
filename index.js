@@ -17,6 +17,7 @@ async function getInnovaProducts() {
             headers: {
                 'auth-token': process.env.INNOVA_AUTH_TOKEN
             },
+            timeout: 30000,
         }
     );
 
@@ -109,7 +110,7 @@ async function updateProducts() {
             const activeVariants = product.Variantes.filter(variant => variant.Tono !== '');
             const shopifyVariants = shopifyProduct.variants.nodes;
             for (const activeVariant of activeVariants) {
-                const variant = shopifyVariants.find(v => v.title === activeVariant.Tono);                
+                const variant = shopifyVariants.find(v => v.title === activeVariant.Tono);
                 const variantInventory = parseInt(activeVariant.Stock);
                 console.log(`Variante encontrada: ${shopifyProduct.title} ${variant.title}, Inventario: Prev ${variant.inventoryQuantity} Now ${variantInventory}`);
 
