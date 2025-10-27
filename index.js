@@ -17,7 +17,7 @@ async function getInnovaProducts() {
             headers: {
                 'auth-token': process.env.INNOVA_AUTH_TOKEN
             },
-            timeout: 30000,
+            timeout: 50000,
         }
     );
 
