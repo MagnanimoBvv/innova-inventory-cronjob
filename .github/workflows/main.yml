@@ -2,9 +2,8 @@ name: Update Products Cronjob
 
 on:
   schedule:
-    # 09:05 a.m. CDMX  -> 15:05 UTC
     - cron: "5 15 * * *"
-    # 04:05 p.m. CDMX  -> 22:05 UTC
+    - cron: "5 19 * * *"
     - cron: "5 22 * * *"
   workflow_dispatch:
 
