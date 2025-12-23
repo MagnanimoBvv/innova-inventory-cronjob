@@ -4,24 +4,42 @@ const { uploadProduct } = require('./uploadProduct');
 const { getLocationId } = require('./getLocations');
 const { getPublications } = require('./getPublications');
 
-async function getInnovaProducts() {
+async function getInnovaProducts(page) {
     const response = await axios.get(
         'https://4vumtdis3m.execute-api.us-east-1.amazonaws.com/default/Innovation_GetAllProductos',
         {
             params: {
                 User: process.env.INNOVA_USER,
                 Clave: process.env.INNOVA_PASSWORD,
-                page: 1,
-                limit: 1500,
+                page,
+                limit: 300,
             },
             headers: {
                 'auth-token': process.env.INNOVA_AUTH_TOKEN
             },
-            timeout: 50000,
         }
     );
 
     return response.data;
+}
+
+async function paginateInnovaProducts() {
+    const firstResponse = await getInnovaProducts(1);
+    let products = firstResponse.productos;
+    const pages = firstResponse.paginas_totales;
+
+    let page = 2;
+    while (true) {
+        const response = await getInnovaProducts(page);
+        products = [...products, ...response.productos];
+
+        if (page >= pages) {
+            break;
+        }
+
+        page++;
+    }
+    return products;
 }
 
 async function getProductByHandle(handle) {
@@ -91,13 +109,11 @@ async function updateInventory(input) {
 }
 
 async function updateProducts() {
-    const response = await getInnovaProducts();
-
-    if (response.respuesta_llave.status !== 'success') return;
+    const products = await paginateInnovaProducts();
 
     const locationId = await getLocationId();
     const productPublications = await getPublications();
-    for (const product of response.productos) {
+    for (const product of products) {
         try {
             // if (product.Codigo !== 'PET 008') continue; // If para pruebas con un producto específico
             const handle = `${product.Nombre.replace(/[.,]/g, '')} ${product.Codigo}`.trim().toLowerCase().replace(/[\s\/-]+/g, '-'); // Reemplaza espacios, diagonales y múltiples guiones
