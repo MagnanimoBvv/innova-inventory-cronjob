@@ -12,7 +12,7 @@ async function getInnovaProducts(page) {
                 User: process.env.INNOVA_USER,
                 Clave: process.env.INNOVA_PASSWORD,
                 page,
-                limit: 300,
+                limit: 100,
             },
             headers: {
                 'auth-token': process.env.INNOVA_AUTH_TOKEN
