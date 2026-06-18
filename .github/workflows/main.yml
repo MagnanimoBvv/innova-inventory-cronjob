@@ -2,9 +2,10 @@ name: Update Products Cronjob
 
 on:
   schedule:
-    - cron: "30 15 * * *"
-    - cron: "30 19 * * *"
-    - cron: "30 23 * * *"
+    # - cron: "30 15 * * *"
+    # - cron: "30 19 * * *"
+    # - cron: "30 23 * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -13,19 +14,19 @@ jobs:
 
     strategy:
       matrix:
-        store: [HHGLOBAL, GNP, PSP]
+        store: [GI, HHG, PSP]
 
     env:
       GRAPHQL_URL: ${{ secrets[ format('GRAPHQL_URL_{0}', matrix.store) ] }}
       SHOPIFY_TOKEN: ${{ secrets[ format('SHOPIFY_TOKEN_{0}', matrix.store) ] }}
       INNOVA_USER: ${{ secrets.INNOVA_USER }}
-      INNOVA_PASSWORD: ${{ secrets.INNOVA_PASSWORD }}
+      INNOVA_PASS: ${{ secrets.INNOVA_PASS }}
       INNOVA_AUTH_TOKEN: ${{ secrets.INNOVA_AUTH_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with: { node-version: "18" }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
       - run: npm install
       - name: Run update for ${{ matrix.store }}
         run: node index.js
