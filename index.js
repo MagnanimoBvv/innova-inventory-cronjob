@@ -1,6 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
-const { getLocationId, getProductByHandle, updateInventory } = require('./shopifyFunctions');
+const { getLocationId, paginateProductsByVendor, updateInventory } = require('./shopifyFunctions');
 
 async function getInnovaProducts(page) {
     const response = await axios.get(
@@ -57,48 +57,68 @@ async function getInnovaInventory() {
     return response.data;
 }
 
-async function updateProducts() {
-    // const products = await paginateInnovaProducts();
-    const inventory = await getInnovaInventory();
+function getStores() {
+    const storeNames = process.env.STORES.split(',');
+
+    return storeNames.map(name => ({
+        name,
+        graphqlUrl: process.env[`GRAPHQL_URL_${name}`],
+        shopifyToken: process.env[`SHOPIFY_TOKEN_${name}`],
+    }));
+}
+
+async function updateProducts(store, inventory) {
     if (inventory.respuesta_llave.status !== 'success') return;
 
-    const locationId = await getLocationId();
+    const locationId = await getLocationId(store);
+    const shopifyProducts = await paginateProductsByVendor(store, 'Innova');
     for (const product of inventory.productos) {
         try {
             // if (product.Codigo !== 'BE-004') continue; // If para pruebas con un producto específico
             const handle = `in-${product.Codigo}`.trim().toLowerCase();
-            const shopifyProduct = await getProductByHandle(handle);
-            if (!shopifyProduct) {
-                continue;
-            }
-
-            const activeVariants = product.Variantes.filter(variant => variant.Tono !== '');
+            const shopifyProduct = shopifyProducts.find(p => p.handle === handle);
+            if (!shopifyProduct) continue;
+            
             const shopifyVariants = shopifyProduct.variants.nodes;
-            for (const activeVariant of activeVariants) {
-                const variant = shopifyVariants.find(v => v.sku === activeVariant['Codigo Variante']);
-                const variantInventory = parseInt(activeVariant.Stock, 10);
-                console.log(`Variante encontrada: ${shopifyProduct.title} ${variant.title}, Inventario: Prev ${variant.inventoryQuantity} Now ${variantInventory}`);
+            const activeVariants = product.Variantes.filter(variant => variant.Tono !== '');
+            const activeVariantBySKU = new Map(activeVariants.map(v => [v['Codigo Variante'], v]));
 
-                if (variant.inventoryQuantity !== variantInventory) {
-                    const variantToUpdate = {
-                        quantities: {
-                            changeFromQuantity: null,
-                            inventoryItemId: variant.inventoryItem.id,
-                            locationId,
-                            quantity: variantInventory,
-                        },
-                        name: "available",
-                        reason: "correction",
-                    };
-                    const response = await updateInventory(variantToUpdate);
-                    console.log('Inventario actualizado:', response.changes);
-                }
+            for (const variant of shopifyVariants) {
+                const activeVariant = activeVariantBySKU.get(variant.sku);
+                const targetInventory = activeVariant ? parseInt(activeVariant.Stock, 10) : 0;
+                const label = activeVariant ? 'Variante existente' : 'Variante faltante';
+                console.log(`[${store.name}] ${label}: ${shopifyProduct.title} ${variant.title}, Prev ${variant.inventoryQuantity} Now ${targetInventory}`);
+
+                if (variant.inventoryQuantity === targetInventory) continue;
+
+                const variantToUpdate = {
+                    quantities: {
+                        changeFromQuantity: null,
+                        inventoryItemId: variant.inventoryItem.id,
+                        locationId,
+                        quantity: targetInventory,
+                    },
+                    name: "available",
+                    reason: "correction",
+                };
+                const response = await updateInventory(store, variantToUpdate);
+                console.log(`[${store.name}] Inventario actualizado:`, response.changes);
             }
             // break;
         } catch (error) {
-            console.error(`Error actualizando el producto ${product.Codigo}:`, error);
+            console.error(`[${store.name}] Error actualizando ${product.Codigo}:`, error);
         }
     }
 }
 
-updateProducts();
+async function main() {
+    // const products = await paginateInnovaProducts();
+    const inventory = await getInnovaInventory();
+
+    const stores = getStores();
+    for (const store of stores) {
+        await updateProducts(store, inventory);
+    }
+}
+
+main();
