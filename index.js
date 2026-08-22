@@ -67,12 +67,10 @@ function getStores() {
     }));
 }
 
-async function updateProducts(store, inventory) {
-    if (inventory.respuesta_llave.status !== 'success') return;
-
+async function updateProducts(store, products) {
     const locationId = await getLocationId(store);
     const shopifyProducts = await paginateProductsByVendor(store, 'Innova');
-    for (const product of inventory.productos) {
+    for (const product of products) {
         try {
             // if (product.Codigo !== 'BE-004') continue; // If para pruebas con un producto específico
             const handle = `in-${product.Codigo}`.trim().toLowerCase();
@@ -114,10 +112,11 @@ async function updateProducts(store, inventory) {
 async function main() {
     // const products = await paginateInnovaProducts();
     const inventory = await getInnovaInventory();
+    if (inventory.respuesta_llave.status !== 'success') return;
 
     const stores = getStores();
     for (const store of stores) {
-        await updateProducts(store, inventory);
+        await updateProducts(store, inventory.productos);
     }
 }
 
