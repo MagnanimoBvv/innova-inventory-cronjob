@@ -73,7 +73,7 @@ async function updateProducts(store, products) {
     for (const product of products) {
         try {
             // if (product.Codigo !== 'BE-004') continue; // If para pruebas con un producto específico
-            const handle = `in-${product.Codigo}`.trim().toLowerCase();
+            const handle = `in-${product.Codigo}`.trim().toLowerCase().replace(/-+/g, '-');
             const shopifyProduct = shopifyProducts.find(p => p.handle === handle);
             if (!shopifyProduct) continue;
             
